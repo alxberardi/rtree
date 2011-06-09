@@ -1,0 +1,12 @@
+# Bundler related
+vendor/bundle
+vendor/ruby
+vendor/cache
+.bundle
+
+# Project files
+nbproject
+
+# Gem files
+pkg
+rdoc
