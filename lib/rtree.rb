@@ -377,6 +377,10 @@ module RTree
       end
       nodes
     end
+    
+    
+    alias_method :find, :find_node
+    alias_method :find_all, :find_all_nodes
       
       
     def to_s
