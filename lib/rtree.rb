@@ -5,9 +5,7 @@ module RTree
       
     include Enumerable
       
-    attr_accessor :content
-      
-      
+    
     def has_content?
       !content.nil?
     end
@@ -381,10 +379,20 @@ module RTree
     
     alias_method :find, :find_node
     alias_method :find_all, :find_all_nodes
-      
+    
+    
+    def content
+      @content
+    end
+    
+    
+    def content=(content)
+      @content = content
+    end
+    
       
     def to_s
-      @content.to_s
+      content.to_s
     end
     
       
