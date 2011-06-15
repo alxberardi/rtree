@@ -24,7 +24,6 @@ describe RTree::Tree, "upon creation with content" do
   end
 end
 
-
 describe RTree::Tree, "upon creation without content" do
   it "should have no content" do
     tree = RTree::Tree.new
@@ -32,7 +31,6 @@ describe RTree::Tree, "upon creation without content" do
     tree.content.should be_nil
   end
 end
-
 
 describe RTree::Tree, "after creation of the root node" do
   before do
@@ -66,7 +64,6 @@ describe RTree::Tree, "after creation of the root node" do
     lambda { @root.add_child("not_a_tree_node") }.should raise_exception
   end
 end
-
 
 describe RTree::Tree, "after creating a tree with children" do
   before do
@@ -105,15 +102,15 @@ describe RTree::Tree, "after creating a tree with children" do
   end
   
   it "should return the tree leafs" do
-   @root.leafs.map(&:content).should eql [
-     "root_child_0_child_0_child_0", 
-     "root_child_0_child_0_child_1", 
-     "root_child_0_child_1_child_0", 
-     "root_child_0_child_1_child_1", 
-     "root_child_1_child_0_child_0", 
-     "root_child_1_child_0_child_1", 
-     "root_child_1_child_1_child_0", 
-     "root_child_1_child_1_child_1" ]
+    @root.leafs.map(&:content).should eql [
+      "root_child_0_child_0_child_0", 
+      "root_child_0_child_0_child_1", 
+      "root_child_0_child_1_child_0", 
+      "root_child_0_child_1_child_1", 
+      "root_child_1_child_0_child_0", 
+      "root_child_1_child_0_child_1", 
+      "root_child_1_child_1_child_0", 
+      "root_child_1_child_1_child_1" ]
   end
   
   it "should return all nodes at a certain depth" do
@@ -128,6 +125,53 @@ describe RTree::Tree, "after creating a tree with children" do
     descendant = @root["root_child_1_child_0"]
     descendant.should_not be_nil
     descendant.content.should eql "root_child_1_child_0"
+  end
+end
+
+describe RTree::Tree, "given the root node" do
+  before do
+    @root = TreeBuilder.build(3, 2)
+  end
+  
+  it "referencing the root should return the same node" do
+    @root.root.should eql @root
+  end
+  
+  it "should return the correct height for the root" do
+    @root.height.should eql 3
+  end
+  
+  it "should return the correct depth for the root" do
+    @root.depth.should eql 0
+  end
+  
+  it "should return the correct breadth for the root" do
+    @root.breadth.should eql 1
+  end
+  
+  it "the root should have no siblings" do
+    @root.siblings.should be_empty
+  end
+  
+  it "the root should be the first and last sibling" do
+    @root.should be_first_sibling
+    @root.should be_last_sibling
+  end
+  
+  it "the path from the node to the root should contain the root only" do
+    @root.path_to_root.map(&:content).should eql ["root"]
+  end
+  
+  it "the path from the node to the root should contain the root only" do
+    @root.path_from_root.map(&:content).should eql ["root"]
+  end
+  
+  it "should return all nodes on the same depth as the node" do
+    @root.depth_nodes.map(&:content).should eql ["root"]
+  end
+  
+  it "should return all nodes on the same height as the node" do
+    @root.height_nodes.map(&:content).should eql ["root"]
   end
 end
 
@@ -171,6 +215,91 @@ describe RTree::Tree, "given an internal node" do
   
   it "should return the path from the root to the node" do
     @node.path_from_root.map(&:content).should eql ["root", "root_child_1", "root_child_1_child_0"]
+  end
+  
+  it "should return all nodes on the same depth as the node" do
+    @node.depth_nodes.map(&:content).should eql [
+      "root_child_0_child_0", 
+      "root_child_0_child_1", 
+      "root_child_1_child_0", 
+      "root_child_1_child_1"]
+  end
+  
+  it "should return all nodes on the same height as the node" do
+    @node.height_nodes.map(&:content).should eql [
+      "root_child_0_child_0", 
+      "root_child_0_child_1", 
+      "root_child_1_child_0", 
+      "root_child_1_child_1"]
+  end
+end
+
+describe RTree::Tree, "given a leaf node" do
+  before do
+    @root = TreeBuilder.build(3, 2)
+    @node = @root["root_child_1_child_0_child_1"]
+  end
+  
+  it "should allow referencing the root from the node" do
+    @node.root.should eql @root
+  end
+  
+  it "should return the correct height for the node" do
+    @node.height.should eql 0
+  end
+  
+  it "should return the correct depth for the node" do
+    @node.depth.should eql 3
+  end
+  
+  it "should return the correct breadth for the node" do
+    @node.breadth.should eql 2
+  end
+  
+  it "should allow referencing the node siblings" do
+    @node.siblings.map(&:content).should eql ["root_child_1_child_0_child_0"]
+    @node.next_sibling.should be_nil
+    @node.previous_sibling.content.should eql "root_child_1_child_0_child_0"
+    @node.previous_sibling.next_sibling.should eql @node
+  end
+  
+  it "should allow to reference the first and last siblings" do
+    @node.previous_sibling.should be_first_sibling
+    @node.should be_last_sibling
+  end
+  
+  it "should return the path from the node to the root" do
+    @node.path_to_root.map(&:content).should eql ["root_child_1_child_0_child_1", "root_child_1_child_0", "root_child_1", "root"]
+  end
+  
+  it "should return the path from the root to the node" do
+    @node.path_from_root.map(&:content).should eql ["root", "root_child_1", "root_child_1_child_0", "root_child_1_child_0_child_1"]
+  end
+  
+  it "should return all nodes on the same depth as the node" do
+    @node.depth_nodes.map(&:content).should eql [
+      "root_child_0_child_0_child_0",
+      "root_child_0_child_0_child_1",
+      "root_child_0_child_1_child_0",
+      "root_child_0_child_1_child_1",
+      "root_child_1_child_0_child_0",
+      "root_child_1_child_0_child_1",
+      "root_child_1_child_1_child_0",
+      "root_child_1_child_1_child_1"]
+
+  end
+  
+  it "should return all nodes on the same height as the node" do
+    @node.height_nodes.map(&:content).should eql [
+      "root_child_0_child_0_child_0",
+      "root_child_0_child_0_child_1",
+      "root_child_0_child_1_child_0",
+      "root_child_0_child_1_child_1",
+      "root_child_1_child_0_child_0",
+      "root_child_1_child_0_child_1",
+      "root_child_1_child_1_child_0",
+      "root_child_1_child_1_child_1"]
+
   end
 end
 

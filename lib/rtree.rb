@@ -169,26 +169,28 @@ module RTree
     alias_method :levels, :height
       
       
-    def depth_nodes(depth)
-      return [self] if depth.zero?
-      children.map { |c| c.depth_nodes(depth - 1) }.flatten
+    def depth_nodes(depth = nil)
+      if depth.nil?
+        root.depth_nodes(self.depth)
+      elsif depth.zero?
+        [self] if depth.zero?
+      else
+        children.map { |c| c.depth_nodes(depth - 1) }.flatten
+      end
     end
-      
 
-    def height_nodes(height)
+    
+    def height_nodes(height = nil)
+      if height.nil?
+        return root.height_nodes(self.height)
+      end
+      
       current_height = self.height
       queue = [self]
         
-      until queue.empty?
-        next_node = queue.shift
-        next_node.children.each { |child| queue.push child }
-        if next_node.last_sibling?
-          if current_height == height + 1
-            return queue
-          else
-            current_height -= 1
-          end
-        end
+      until current_height == height || queue.empty?
+        queue.map!(&:children).flatten!
+        current_height -= 1
       end
       
       queue
