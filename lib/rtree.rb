@@ -4,13 +4,8 @@ module RTree
   module TreeNode
       
     include Enumerable
-      
     
-    def has_content?
-      !content.nil?
-    end
-      
-      
+    
     def parent
       @parent
     end
@@ -384,20 +379,15 @@ module RTree
     
     
     def content
-      @content
+      nil
     end
     
     
-    def content=(content)
-      @content = content
+    def has_content?
+      !content.nil?
     end
     
-      
-    def to_s
-      content.to_s
-    end
     
-      
     protected
       
     def validate_parent!(node)
@@ -417,6 +407,8 @@ module RTree
   class Tree
       
     include RTree::TreeNode
+    
+    attr_accessor :content
       
     def initialize(content = nil)
       @content = content
@@ -429,6 +421,11 @@ module RTree
       else
         self.new(node)
       end
+    end
+    
+    
+    def to_s
+      content.to_s
     end
       
   end
