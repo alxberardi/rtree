@@ -20,7 +20,7 @@ spec = Gem::Specification.new do |s|
 
   # Change these as appropriate
   s.name              = "rtree"
-  s.version           = "0.1.1"
+  s.version           = "0.1.2"
   s.summary           = "Ruby implementation of tree structures"
   s.author            = "Alessandro Berardi,,,"
   s.email             = "berardialessandro@gmail.com"

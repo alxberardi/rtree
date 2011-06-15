@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rtree}
-  s.version = "0.1.1"
+  s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Alessandro Berardi,,,"]
-  s.date = %q{2011-06-14}
+  s.date = %q{2011-06-15}
   s.email = %q{berardialessandro@gmail.com}
   s.extra_rdoc_files = ["README"]
   s.files = ["Gemfile.lock", "README", "Gemfile", "spec/rtree_spec.rb", "lib/rtree.rb"]
