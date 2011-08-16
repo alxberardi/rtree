@@ -60,6 +60,21 @@ describe RTree::Tree, "after creation of the root node" do
     child3.parent.should eql @root
   end
   
+  it "should return the children array when adding a child" do
+    child1 = RTree::Tree.new("1st child")
+    child2 = RTree::Tree.new("2nd child")
+    @root.add_child(child1)
+    @root.add_child(child2).should eql @root.children
+  end
+  
+  it "should return the children array when adding multiple children" do
+    child1 = RTree::Tree.new("1st child")
+    child2 = RTree::Tree.new("2nd child")
+    child3 = RTree::Tree.new("3rd child")
+    @root.add_child(child1)
+    @root.add_children(child2, child3).should eql @root.children
+  end
+  
   it "should validate a child before adding it" do
     lambda { @root.add_child("not_a_tree_node") }.should raise_exception
   end

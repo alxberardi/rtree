@@ -45,6 +45,7 @@ module RTree
       
     def add_children_array(children)
       children.each { |c| add_child(c) }
+      self.children
     end
       
       
