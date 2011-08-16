@@ -45,12 +45,19 @@ describe RTree::Tree, "after creation of the root node" do
     child.parent.should eql @root
   end
   
+  it "should allow adding a child by using the '<<' operator" do
+    child = RTree::Tree.new("1st child")
+    @root << child
+    @root.children.size.should eql 1
+    @root.children.should include child
+    child.parent.should eql @root
+  end
   
   it "should allow adding multiple children" do
     child1 = RTree::Tree.new("1st child")
     child2 = RTree::Tree.new("2nd child")
     child3 = RTree::Tree.new("3rd child")
-    @root.add_children child1, child2, child3
+    @root.add_children(child1, child2, child3)
     @root.children.size.should eql 3
     @root.children.should include child1
     @root.children.should include child2
@@ -100,7 +107,7 @@ describe RTree::Tree, "after creating a tree with children" do
     lambda { @root.children[1].detach! }.should_not raise_exception
   end
   
-  it "should correctly detach child when it's removed" do
+  it "should correctly detach a child when it's removed" do
     removed_child = @root.remove_child(@root.children[1])
     removed_child.should_not be_nil
     removed_child.content.should eql "root_child_1"
@@ -152,10 +159,18 @@ describe RTree::Tree, "after creating a tree with children" do
     @root.height_nodes(2).map(&:content).should eql ["root_child_0", "root_child_1"]
   end
   
-  it "should allow referencing a node by its content" do
+  it "should allow referencing a node by its content through the '[]' operator" do
     descendant = @root["root_child_1_child_0"]
     descendant.should_not be_nil
     descendant.content.should eql "root_child_1_child_0"
+  end
+  
+  it "should allow comparing node contents through the '<=>' operator" do
+    descendant1 = @root["root_child_1_child_0"]
+    descendant2 = @root["root_child_1_child_1"]
+    descendant1.content = 2
+    descendant2.content = 1
+    (descendant1 <=> descendant2).should eql 1
   end
 end
 
