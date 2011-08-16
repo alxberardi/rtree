@@ -75,6 +75,13 @@ describe RTree::Tree, "after creation of the root node" do
     @root.add_children(child2, child3).should eql @root.children
   end
   
+  it "shouldn't add the same child twice" do
+    child = RTree::Tree.new("1st child")
+    @root.add_child(child)
+    @root.add_child(child)
+    @root.children.size.should eql 1
+  end
+  
   it "should validate a child before adding it" do
     lambda { @root.add_child("not_a_tree_node") }.should raise_exception
   end
@@ -100,6 +107,15 @@ describe RTree::Tree, "after creating a tree with children" do
     removed_child.parent.should be_nil
     @root.children[1].should be_nil
     @root.size.should eql 8
+  end
+  
+  it "should detach a node from its parent before adding it to the children of another node" do
+    root_child = @root.children[1]
+    root_child_child = @root.children[1].children[0]
+    @root.add_child(root_child_child)
+    root_child_child.parent.should eql @root
+    @root.children.should include root_child_child
+    root_child.children.should_not include root_child_child
   end
   
   it "should allow removing all children from a node" do

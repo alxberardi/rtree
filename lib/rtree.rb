@@ -28,7 +28,7 @@ module RTree
       
       
     def add_child(child)
-      validate_node!(child).parent = self
+      validate_node!(child).detach!.parent = self
       children << child
     end
       
