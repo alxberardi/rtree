@@ -1,40 +1,16 @@
 require 'enumerator'
 
 module RTree
-  module TreeNode
-      
-    include Enumerable
+  
+  module TreeNodeMainInstanceMethods
     
+    # ----------------------------------------------------------------
+    # Children
+    # ----------------------------------------------------------------
     
-    def parent
-      @parent
-    end
-      
-      
-    def parent=(parent)
-      @parent = validate_parent!(parent)
-    end
-      
-    
-    def detach!
-      return self if root?
-      parent.remove_child(self)
-    end
-    
-      
-    def children
-      @children ||= []
-    end
-      
-      
     def add_child(child)
       validate_node!(child).detach!.parent = self
       children << child
-    end
-      
-      
-    def <<(child)
-      add_child(child)
     end
       
       
@@ -70,6 +46,17 @@ module RTree
     def clear!
       each_node_reverse(&:detach!)
     end
+    
+    
+    # ----------------------------------------------------------------
+    # Tree nodes
+    # ----------------------------------------------------------------
+    
+    def ancestors
+      node, nodes = self, []
+      nodes << node = node.parent while node.parent
+      nodes
+    end
       
       
     def root
@@ -77,13 +64,17 @@ module RTree
       node = node.parent while node.parent
       node
     end
-      
-      
+    
+    
     def leafs
       return [self] if leaf?
       children.map(&:leafs).flatten
     end
-      
+    
+    
+    # ----------------------------------------------------------------
+    # Siblings
+    # ----------------------------------------------------------------
       
     def siblings
       root? ? [] : parent.children - [self]
@@ -114,8 +105,22 @@ module RTree
     def last_sibling
       root? ? self : parent.children.last
     end
+    
+    
+    # ----------------------------------------------------------------
+    # Node
+    # ----------------------------------------------------------------
       
-      
+    def detach!
+      return self if root?
+      parent.remove_child(self)
+    end
+    
+    
+    # ----------------------------------------------------------------
+    # Node properties
+    # ----------------------------------------------------------------
+    
     def root?
       parent.nil?
     end
@@ -163,8 +168,45 @@ module RTree
       
     alias_method :level, :depth
     alias_method :levels, :height
+    
+    
+    
+    # ----------------------------------------------------------------
+    # Tree traversal
+    # ----------------------------------------------------------------
+    
+
+    def each_node(&action)
+      action && action.call(self)
+      [self] + each_descendant(&action)
+    end
+    
+    
+    alias_method :each, :each_node
+
+
+    def each_node_reverse(&action)
+      descendants = each_descendant_reverse(&action)
+      action && action.call(self)
+      descendants + [self]
+    end
       
       
+    def each_child(&action)
+      children.each { |c| action && action.call(c) }
+    end
+
+
+    def each_descendant(&action)
+      children.map { |c| c.each_node(&action) }.flatten
+    end
+
+
+    def each_descendant_reverse(&action)
+      children.reverse.map { |c| c.each_node_reverse(&action) }.flatten
+    end
+    
+    
     def depth_nodes(depth = nil)
       if depth.nil?
         root.depth_nodes(self.depth)
@@ -217,34 +259,6 @@ module RTree
     end
 
 
-    def each_node(&action)
-      action && action.call(self)
-      [self] + each_descendant(&action)
-    end
-
-
-    def each_node_reverse(&action)
-      descendants = each_descendant_reverse(&action)
-      action && action.call(self)
-      descendants + [self]
-    end
-      
-      
-    def each_child(&action)
-      children.each { |c| action && action.call(c) }
-    end
-
-
-    def each_descendant(&action)
-      children.map { |c| c.each_node(&action) }.flatten
-    end
-
-
-    def each_descendant_reverse(&action)
-      children.reverse.map { |c| c.each_node_reverse(&action) }.flatten
-    end
-
-
     def path_to_root(&action)
       action && action.call(self)
       [self] + each_parent(&action)
@@ -289,22 +303,6 @@ module RTree
     end
       
       
-    def each(&action)
-      each_node(&action)
-    end
-
-      
-    def <=>(other)
-      return +1 if other.nil?
-      self.content <=> other.content
-    end
-      
-      
-    def [](content)
-      find_node { |n| n.content == content  }
-    end
-      
-
     def map(&action)
       map = []
       each_node { |n| map << ( action ? action.call(n) : n ) }
@@ -328,6 +326,17 @@ module RTree
       map = []
       breadth_each { |n| map << ( action ? action.call(n) : n ) }
       map
+    end
+    
+    
+    
+    # ----------------------------------------------------------------
+    # Tree search
+    # ----------------------------------------------------------------
+    
+    
+    def find_node_by_content(content)
+      find_node { |n| n.content == content }
     end
       
       
@@ -375,8 +384,10 @@ module RTree
     end
     
     
-    alias_method :find, :find_node
-    alias_method :find_all, :find_all_nodes
+    
+    # ----------------------------------------------------------------
+    # Node content
+    # ----------------------------------------------------------------
     
     
     def content
@@ -388,6 +399,24 @@ module RTree
       !content.nil?
     end
     
+    
+    
+    # ----------------------------------------------------------------
+    # Enumerable
+    # ----------------------------------------------------------------
+    
+    
+    def <=>(other)
+      return +1 if other.nil?
+      self.content <=> other.content
+    end
+    
+    include Enumerable
+    
+    
+    # ----------------------------------------------------------------
+    # Protected
+    # ----------------------------------------------------------------
     
     protected
       
@@ -402,6 +431,44 @@ module RTree
     end
     
 
+  end
+  
+  
+  module TreeNodeInstanceMethods
+    
+    include RTree::TreeNodeMainInstanceMethods
+    
+    def parent
+      @parent
+    end
+      
+      
+    def parent=(parent)
+      @parent = validate_parent!(parent)
+    end
+      
+    
+    def children
+      @children ||= []
+    end
+    
+  end
+  
+  
+  module TreeNode
+    
+    include RTree::TreeNodeInstanceMethods
+    
+    
+    def [](content)
+      find_node_by_content(content)
+    end
+    
+    
+    def <<(child)
+      add_child(child)
+    end
+    
   end
     
     
@@ -430,5 +497,6 @@ module RTree
     end
       
   end
+  
 end
 
