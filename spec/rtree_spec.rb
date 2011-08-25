@@ -204,6 +204,10 @@ describe RTree::Tree, "given the root node" do
     @root.should be_last_sibling
   end
   
+  it "the root should have no ancestors" do
+    @root.ancestors.should be_empty
+  end
+  
   it "the path from the node to the root should contain the root only" do
     @root.path_to_root.map(&:content).should eql ["root"]
   end
@@ -253,6 +257,10 @@ describe RTree::Tree, "given an internal node" do
   it "should allow to reference the first and last siblings" do
     @node.should be_first_sibling
     @node.next_sibling.should be_last_sibling
+  end
+  
+  it "should return the node ancestors" do
+    @node.ancestors.map(&:content).should eql ["root_child_1", "root"]
   end
   
   it "should return the path from the node to the root" do
@@ -312,6 +320,10 @@ describe RTree::Tree, "given a leaf node" do
   it "should allow to reference the first and last siblings" do
     @node.previous_sibling.should be_first_sibling
     @node.should be_last_sibling
+  end
+  
+  it "should return the node ancestors" do
+    @node.ancestors.map(&:content).should eql ["root_child_1_child_0", "root_child_1", "root"]
   end
   
   it "should return the path from the node to the root" do
