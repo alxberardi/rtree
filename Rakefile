@@ -1,11 +1,11 @@
 require "rubygems"
-require "rake/gempackagetask"
-require "rake/rdoctask"
+require "rubygems/package_task"
+require "rdoc/task"
 
 require "rspec"
 require "rspec/core/rake_task"
 RSpec::Core::RakeTask.new do |t|
-  t.rspec_opts = %w(--format specdoc --colour)
+  t.rspec_opts = %w(--format documentation --colour)
 end
 
 
@@ -20,8 +20,8 @@ spec = Gem::Specification.new do |s|
 
   # Change these as appropriate
   s.name              = "rtree"
-  s.version           = "0.1.3"
-  s.summary           = "Ruby implementation of tree structures"
+  s.version           = "0.2.0"
+  s.summary           = "Ruby implementation of tree structures with ActiveRecord acts_as module"
   s.author            = "Alessandro Berardi,,,"
   s.email             = "berardialessandro@gmail.com"
   s.homepage          = "http://github.com/AlessandroBerardi/rtree"
@@ -31,7 +31,7 @@ spec = Gem::Specification.new do |s|
   s.rdoc_options      = %w(--main README)
 
   # Add any extra files to include in the gem
-  s.files             = %w(Gemfile.lock README Gemfile) + Dir.glob("{spec,lib}/**/*")
+  s.files             = %w(rtree.gemspec Gemfile.lock Rakefile README Gemfile) + Dir.glob("{spec,lib}/**/*")
   s.require_paths     = ["lib"]
 
   # If you want to depend on other gems, add them here, along with any
@@ -49,7 +49,7 @@ end
 #
 # To publish your gem online, install the 'gemcutter' gem; Read more 
 # about that here: http://gemcutter.org/pages/gem_docs
-Rake::GemPackageTask.new(spec) do |pkg|
+Gem::PackageTask.new(spec) do |pkg|
   pkg.gem_spec = spec
 end
 
@@ -67,7 +67,7 @@ end
 task :package => :gemspec
 
 # Generate documentation
-Rake::RDocTask.new do |rd|
+RDoc::Task.new do |rd|
   rd.main = "README"
   rd.rdoc_files.include("README", "lib/**/*.rb")
   rd.rdoc_dir = "rdoc"

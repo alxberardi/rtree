@@ -2,19 +2,19 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rtree}
-  s.version = "0.1.3"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Alessandro Berardi,,,"]
-  s.date = %q{2011-08-16}
+  s.date = %q{2011-08-25}
   s.email = %q{berardialessandro@gmail.com}
   s.extra_rdoc_files = ["README"]
-  s.files = ["Gemfile.lock", "README", "Gemfile", "spec/rtree_spec.rb", "lib/rtree.rb"]
+  s.files = ["rtree.gemspec", "Gemfile.lock", "Rakefile", "README", "Gemfile", "spec/rtree_spec.rb", "lib/acts_as_rtree.rb", "lib/rtree.rb"]
   s.homepage = %q{http://github.com/AlessandroBerardi/rtree}
   s.rdoc_options = ["--main", "README"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.6.2}
-  s.summary = %q{Ruby implementation of tree structures}
+  s.summary = %q{Ruby implementation of tree structures with ActiveRecord acts_as module}
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
