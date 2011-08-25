@@ -1,3 +1,4 @@
 = RTree
 
-Ruby implementation of tree structures
+RTree is a Ruby implementation of generic tree structures.
+ActsAsRTree adds RTree features to ActiveRecord models by mimicking ActsAsTree.
