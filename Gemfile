@@ -1,6 +1,6 @@
 source :gemcutter
 
-gem 'rake', '0.8.7'
+gem 'rake'
 gem 'gem-this'
 
 group :test do
