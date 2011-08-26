@@ -20,7 +20,7 @@ spec = Gem::Specification.new do |s|
 
   # Change these as appropriate
   s.name              = "rtree"
-  s.version           = "0.2.0"
+  s.version           = "0.2.1"
   s.summary           = "Ruby implementation of tree structures with ActiveRecord acts_as module"
   s.author            = "Alessandro Berardi,,,"
   s.email             = "berardialessandro@gmail.com"
