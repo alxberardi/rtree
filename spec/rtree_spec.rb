@@ -456,3 +456,93 @@ describe RTree::Tree, "when searching for nodes" do
       "root_child_1_child_1"]
   end
 end
+
+
+describe RTree::Tree, "when implementing a Tree class" do
+  before do
+    class ValidNode < RTree::Tree; end
+    class InvalidNode; end
+    class ExtendedValidNodeOne < ValidNode; end
+    class ExtendedValidNodeTwo < ValidNode; end
+  end
+  
+  it "should allow specifying valid child node classes" do
+    class TestClassOne < ValidNode
+      set_acceptable_child_types :test_class_one, :extended_valid_node_one
+    end
+    
+    TestClassOne.acceptable_child_types.should eql [:test_class_one, :extended_valid_node_one]
+  end
+  
+  it "should not allow specifying classes which do not implement the tree node interface as valid child node classes" do
+    class TestClassTwo < ValidNode; end
+    lambda { TestClassTwo.set_acceptable_child_types :invalid_node }.should raise_error
+  end
+  
+  it "when extending a node class it should inherit valid child node classes definitions" do
+    class BaseNodeClass < ValidNode
+      set_acceptable_child_types :extended_valid_node_one, :extended_valid_node_two
+    end
+    
+    class ExtendedNodeClass < BaseNodeClass; end
+    
+    BaseNodeClass.acceptable_child_types.should eql [:extended_valid_node_one, :extended_valid_node_two]
+    ExtendedNodeClass.acceptable_child_types.should eql BaseNodeClass.acceptable_child_types
+  end
+  
+  it "should accept valid child nodes" do
+    class TestClassThree < ValidNode
+      set_acceptable_child_types :extended_valid_node_one
+    end
+    
+    parent = TestClassThree.new('parent')
+    child = ExtendedValidNodeOne.new('child')
+    
+    lambda { parent << child }.should_not raise_error
+    parent.children.should eql [child]
+  end
+  
+  it "should not accept invalid child nodes" do
+    class TestClassFour < ValidNode
+      set_acceptable_child_types :extended_valid_node_one
+    end
+    
+    parent = TestClassFour.new('parent')
+    child = InvalidNode
+    
+    lambda { parent << child }.should raise_error
+  end
+  
+  it "should accept any valid tree node as a child if no valid child node classes are specified" do
+    class TestClassFive < ValidNode; end
+    
+    parent = TestClassFive.new('parent')
+    child1 = ValidNode.new('child 1')
+    child2 = ExtendedValidNodeTwo.new('child 2')
+    
+    lambda { parent.add_children child1, child2 }.should_not raise_error
+    parent.children.should eql [child1, child2]
+  end
+  
+  it "should allow forcing instances of a specific node class to always be leafs" do
+    class LeafNodeClass < ValidNode
+      force_leaf_node!
+    end
+    
+    parent = LeafNodeClass.new('parent')
+    child = ValidNode.new('child')
+    
+    lambda { parent << child }.should raise_error
+  end
+  
+  it "should allow identifying leaf node classes" do
+    class LeafNodeClass < ValidNode
+      force_leaf_node!
+    end
+    
+    class InternalNodeClass < ValidNode; end
+    
+    LeafNodeClass.leaf_node?.should be_true
+    InternalNodeClass.leaf_node?.should be_false
+  end
+end

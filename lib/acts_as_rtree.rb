@@ -8,8 +8,8 @@ module RTree
       super
     end
 
+    
     module ClassMethods
-      
       def acts_as_rtree(options = {})
         configuration = { 
           :foreign_key => "parent_id", 
@@ -38,7 +38,7 @@ module RTree
           :after_remove => configuration[:after_remove]
 
         class_eval <<-EOV
-          include RTree::TreeNodeMainInstanceMethods
+          include RTree::Node
 
           def self.roots
             find(:all, :conditions => "#{configuration[:foreign_key]} IS NULL", :order => #{configuration[:order].nil? ? "nil" : %Q{"#{configuration[:order]}"}})
