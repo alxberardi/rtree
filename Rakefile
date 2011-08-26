@@ -37,6 +37,8 @@ spec = Gem::Specification.new do |s|
   # If you want to depend on other gems, add them here, along with any
   # relevant versions
   # s.add_dependency("some_other_gem", "~> 0.1.0")
+  s.add_dependency("i18n", ">= 0.6.0")
+  s.add_dependency("activesupport", ">= 2.3.8")
 
   # If your tests use any gems, include them here
   s.add_development_dependency("rspec")
