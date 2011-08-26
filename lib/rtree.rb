@@ -541,11 +541,21 @@ module RTree
   end
   
   
+  module TreeNode
+    
+    def self.included(base)
+      base.send(:include, RTree::Base)
+      base.send(:include, RTree::Node)
+      base.send(:include, RTree::Extended)
+      super
+    end
+    
+  end
+  
+  
   class Tree
     
-    include RTree::Base
-    include RTree::Node
-    include RTree::Extended
+    include RTree::TreeNode
     
     attr_accessor :content
       
