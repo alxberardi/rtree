@@ -471,12 +471,16 @@ describe RTree::Tree, "when implementing a Tree class" do
       set_acceptable_child_types :test_class_one, :extended_valid_node_one
     end
     
-    TestClassOne.acceptable_child_types.should eql [:test_class_one, :extended_valid_node_one]
+    TestClassOne.acceptable_child_types.should eql ["TestClassOne", "ExtendedValidNodeOne"]
   end
   
-  it "should not allow specifying classes which do not implement the tree node interface as valid child node classes" do
-    class TestClassTwo < ValidNode; end
-    lambda { TestClassTwo.set_acceptable_child_types :invalid_node }.should raise_error
+  it "should allow adding valid child node classes" do
+    class TestClassOne < ValidNode
+      set_acceptable_child_types :test_class_one, :extended_valid_node_one
+    end
+    
+    TestClassOne.add_acceptable_child_types :extended_valid_node_two
+    TestClassOne.acceptable_child_types.should eql ["TestClassOne", "ExtendedValidNodeOne", "ExtendedValidNodeTwo"]
   end
   
   it "when extending a node class it should inherit valid child node classes definitions" do
@@ -486,7 +490,7 @@ describe RTree::Tree, "when implementing a Tree class" do
     
     class ExtendedNodeClass < BaseNodeClass; end
     
-    BaseNodeClass.acceptable_child_types.should eql [:extended_valid_node_one, :extended_valid_node_two]
+    BaseNodeClass.acceptable_child_types.should eql ["ExtendedValidNodeOne", "ExtendedValidNodeTwo"]
     ExtendedNodeClass.acceptable_child_types.should eql BaseNodeClass.acceptable_child_types
   end
   

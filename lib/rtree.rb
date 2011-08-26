@@ -21,28 +21,29 @@ module RTree
 
 
       def set_acceptable_child_types(*class_names)
+        @acceptable_child_types = class_names.map { |c| c.to_s.classify }.uniq
+      end
+      
+      
+      def add_acceptable_child_types(*class_names)
+        acceptable_child_types_array.concat(class_names.map { |c| c.to_s.classify }).uniq!
+      end
+      
+      
+      def clear_acceptable_child_types
         @acceptable_child_types = []
-        class_names.each do |c|
-          class_name = c.to_s.classify
-          # Avoid recursive class dependencies
-          if const_defined?(class_name)
-            node_class = class_name.constantize
-            raise Exception, "#{class_name} does not implement #{RTree::Node.name}" unless node_class <= RTree::Node
-          end
-          @acceptable_child_types << c.to_s.underscore.to_sym
-        end
       end
 
 
       def acceptable_child?(child)
         acceptable_child_types_array.any? do |c|
-          child.is_a?(c.to_s.classify.constantize)
+          child.is_a?(c.constantize)
         end
       end
 
 
       def force_leaf_node!
-        @acceptable_child_types = []
+        clear_acceptable_child_types
       end
 
 
@@ -54,7 +55,7 @@ module RTree
       protected
 
       def acceptable_child_types_array
-        @acceptable_child_types ||= [self.name.underscore.to_sym]
+        @acceptable_child_types ||= [self.to_s]
       end
 
 
@@ -488,6 +489,7 @@ module RTree
 
 
       def validate_child!(node)
+        raise Exception, "Instances of #{self.class.name} are set to always be leaf nodes" if self.class.leaf_node?
         child = validate_node!(node)
         raise Exception, "#{child.class.name} is not an acceptable child for #{self.class.name}" unless self.class.acceptable_child?(child)
         child
