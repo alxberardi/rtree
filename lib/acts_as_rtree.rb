@@ -3,12 +3,8 @@ require 'active_record/base'
 module RTree
   module ActsAsRTree
     
-    def self.included(base)
-      base.extend(ClassMethods)
-      super
-    end
+    extend ActiveSupport::Concern
 
-    
     module ClassMethods
       def acts_as_rtree(options = {})
         configuration = { 
