@@ -366,11 +366,13 @@ module RTree
       end
 
 
-      def map(&action)
+      def map_nodes(&action)
         map = []
         each_node { |n| map << ( action ? action.call(n) : n ) }
         map
       end
+      
+      alias_method :map, :map_nodes
 
 
       def map_descendants(&action)
@@ -381,7 +383,7 @@ module RTree
 
 
       def depth_map(&action)
-        map(&action)
+        map_nodes(&action)
       end
 
 
