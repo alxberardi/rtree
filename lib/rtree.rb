@@ -62,6 +62,7 @@ module RTree
       def acceptable_child_types_array=(child_types)
         @acceptable_child_types = child_types
       end
+      
     end
 
 
@@ -72,8 +73,12 @@ module RTree
       # ----------------------------------------------------------------
 
       def add_child(child)
-        validate_child!(child).detach!.parent = self
-        children << child
+        if child.is_a?(Array)
+          add_children_array(child)
+        else
+          validate_child!(child).detach!.parent = self
+          children << child
+        end
       end
 
 
@@ -504,7 +509,6 @@ module RTree
         raise Exception, "#{node} is not a valid tree node" unless node.class <= RTree::Node
         node
       end
-
 
     end
     

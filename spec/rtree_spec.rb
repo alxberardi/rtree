@@ -45,6 +45,34 @@ describe RTree::Tree, "after creation of the root node" do
     child.parent.should eql @root
   end
   
+  it "should allow adding multiple children" do
+    child1 = RTree::Tree.new("1st child")
+    child2 = RTree::Tree.new("2nd child")
+    child3 = RTree::Tree.new("3rd child")
+    @root.add_children(child1, child2, child3)
+    @root.children.size.should eql 3
+    @root.children.should include child1
+    @root.children.should include child2
+    @root.children.should include child3
+    child1.parent.should eql @root
+    child2.parent.should eql @root
+    child3.parent.should eql @root
+  end
+  
+  it "should allow adding an array of children" do
+    child1 = RTree::Tree.new("1st child")
+    child2 = RTree::Tree.new("2nd child")
+    child3 = RTree::Tree.new("3rd child")
+    @root.add_children([child1, child2, child3])
+    @root.children.size.should eql 3
+    @root.children.should include child1
+    @root.children.should include child2
+    @root.children.should include child3
+    child1.parent.should eql @root
+    child2.parent.should eql @root
+    child3.parent.should eql @root
+  end
+  
   it "should allow adding a child by using the '<<' operator" do
     child = RTree::Tree.new("1st child")
     @root << child
@@ -53,11 +81,11 @@ describe RTree::Tree, "after creation of the root node" do
     child.parent.should eql @root
   end
   
-  it "should allow adding multiple children" do
+  it "should allow adding multiple children by using the '<<' operator" do
     child1 = RTree::Tree.new("1st child")
     child2 = RTree::Tree.new("2nd child")
     child3 = RTree::Tree.new("3rd child")
-    @root.add_children(child1, child2, child3)
+    @root << [child1, child2, child3]
     @root.children.size.should eql 3
     @root.children.should include child1
     @root.children.should include child2
