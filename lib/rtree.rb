@@ -327,23 +327,23 @@ module RTree
 
       def path_to_root(&action)
         action && action.call(self)
-        [self] + each_parent(&action)
+        [self] + each_ancestor(&action)
       end
 
 
-      def each_parent(&action)
+      def each_ancestor(&action)
         root? ? [] : parent.path_to_root(&action)
       end
 
 
       def path_from_root(&action)
-        parents = each_parent_reverse(&action)
+        ancestors = each_ancestor_reverse(&action)
         action && action.call(self)
-        parents + [self]
+        ancestors + [self]
       end
 
 
-      def each_parent_reverse(&action)
+      def each_ancestor_reverse(&action)
         root? ? [] : parent.path_from_root(&action)
       end
 
@@ -362,9 +362,9 @@ module RTree
       end
 
 
-      def map_parents(&action)
+      def map_ancestors(&action)
         map = []
-        each_parent { |n| map << ( action ? action.call(n) : n ) }
+        each_ancestor { |n| map << ( action ? action.call(n) : n ) }
         map
       end
 
