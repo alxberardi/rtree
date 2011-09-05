@@ -449,19 +449,19 @@ describe RTree::Tree, "when searching for nodes" do
   end
   
   it "should allow searching for a single node that matches condition" do
-    found_node = @root.find { |n| n.content == "root_child_1_child_0"}
+    found_node = @root.find { |n| n.content == "root_child_1_child_0" }
     found_node.should_not be_nil
     found_node.content.should eql "root_child_1_child_0"
   end
   
   it "should allow searching for all nodes that match a condition" do
-    found_nodes = @root.find_all { |n| n.content.start_with?("root_child_0")}
+    found_nodes = @root.find_all { |n| n.content == "root" || n.content.start_with?("root_child_0") }
     found_nodes.should_not be_empty
-    found_nodes.map(&:content).sort.should eql ["root_child_0", "root_child_0_child_0", "root_child_0_child_1"]
+    found_nodes.map(&:content).sort.should eql ["root", "root_child_0", "root_child_0_child_0", "root_child_0_child_1"]
   end
   
   it "should allow searching in depth for all nodes that match a condition" do
-    found_nodes = @root.depth_search_all { |n| n.content.start_with?("root_child")}
+    found_nodes = @root.depth_search_all { |n| n.content.start_with?("root_child") }
     found_nodes.should_not be_empty
     found_nodes.map(&:content).should eql [
       "root_child_0", 
@@ -473,7 +473,7 @@ describe RTree::Tree, "when searching for nodes" do
   end
   
   it "should allow searching in breadth for all nodes that match a condition" do
-    found_nodes = @root.breadth_search_all { |n| n.content.start_with?("root_child")}
+    found_nodes = @root.breadth_search_all { |n| n.content.start_with?("root_child") }
     found_nodes.should_not be_empty
     found_nodes.map(&:content).should eql [
       "root_child_0", 
