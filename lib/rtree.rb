@@ -151,7 +151,6 @@ module RTree
 
       def next_sibling
         return nil if root?
-
         node_index = parent.children.index(self)
         parent.children.at(node_index + 1) if node_index
       end
@@ -159,7 +158,6 @@ module RTree
 
       def previous_sibling
         return nil if root?
-
         node_index = parent.children.index(self)
         parent.children.at(node_index - 1) if node_index && node_index > 0
       end
