@@ -419,8 +419,9 @@ module RTree
 
 
       def breadth_search(&condition)
+        return nil unless condition
         breadth_each do |n|
-          return n if condition && condition.call(n)
+          return n if condition.call(n)
         end
         nil
       end
@@ -428,16 +429,18 @@ module RTree
 
       def breadth_search_all(&condition)
         nodes = []
+        return nodes unless condition
         breadth_each do |n|
-          nodes << n if condition && condition.call(n)
+          nodes << n if condition.call(n)
         end
         nodes
       end
 
 
       def find_node(&condition)
+        return nil unless condition
         each_node do |n|
-          return n if condition && condition.call(n)
+          return n if condition.call(n)
         end
         nil
       end
@@ -445,8 +448,47 @@ module RTree
 
       def find_all_nodes(&condition)
         nodes = []
+        return nodes unless condition
         each_node do |n|
-          nodes << n if condition && condition.call(n)
+          nodes << n if condition.call(n)
+        end
+        nodes
+      end
+      
+      
+      def find_descendant(&condition)
+        return nil unless condition
+        each_descendant do |n|
+          return n if condition.call(n)
+        end
+        nil
+      end
+
+
+      def find_all_descendants(&condition)
+        nodes = []
+        return nodes unless condition
+        each_descendant do |n|
+          nodes << n if condition.call(n)
+        end
+        nodes
+      end
+      
+      
+      def find_ancestor(&condition)
+        return nil unless condition
+        each_ancestor do |n|
+          return n if condition.call(n)
+        end
+        nil
+      end
+
+
+      def find_all_ancestors(&condition)
+        nodes = []
+        return nodes unless condition
+        each_ancestor do |n|
+          nodes << n if condition.call(n)
         end
         nodes
       end
