@@ -441,6 +441,32 @@ describe RTree::Tree, "when visiting the nodes" do
   it "should allow mapping the nodes in breadth" do
     @root.breadth_map(&:content).should eql @breadth
   end
+  
+  it "should allow a depth visit on the descendants" do
+    nodes = []
+    @root.each_descendant do |n|
+      nodes << n.content
+    end
+    nodes.should eql @depth[1..-1]
+  end
+  
+  it "should allow mapping the descendants in depth" do
+    @root.map_descendants(&:content).should eql @depth[1..-1]
+  end
+  
+  it "should allow a visit on the ancestors" do
+    starting_node = @root["root_child_1_child_0"]
+    nodes = []
+    starting_node.each_ancestor do |n|
+      nodes << n.content
+    end
+    nodes.should eql ["root_child_1", "root"]
+  end
+  
+  it "should allow mapping the ancestors" do
+    starting_node = @root["root_child_1_child_0"]
+    starting_node.map_ancestors(&:content).should eql ["root_child_1", "root"]
+  end
 end
 
 describe RTree::Tree, "when searching for nodes" do
@@ -482,6 +508,37 @@ describe RTree::Tree, "when searching for nodes" do
       "root_child_0_child_1", 
       "root_child_1_child_0", 
       "root_child_1_child_1"]
+  end
+  
+  it "should allow searching for a single descendant that matches condition" do
+    found_node = @root.find_descendant { |n| n.content == "root_child_1_child_0" }
+    found_node.should_not be_nil
+    found_node.content.should eql "root_child_1_child_0"
+  end
+  
+  it "should allow searching for all descendants that match a condition" do
+    found_nodes = @root.find_all_descendants { |n| n.content.start_with?("root_child_0") }
+    found_nodes.should_not be_empty
+    found_nodes.map(&:content).sort.should eql ["root_child_0", "root_child_0_child_0", "root_child_0_child_1"]
+  end
+  
+  it "should allow searching for a single ancestor that matches condition" do
+    searching_node = @root["root_child_1_child_0"]
+    found_node = searching_node.find_ancestor { |n| n.content == "root_child_1_child_0" }
+    found_node.should be_nil
+    found_node = searching_node.find_ancestor { |n| n.content == "root_child_1" }
+    found_node.should_not be_nil
+    found_node.content.should eql "root_child_1"
+    found_node = searching_node.find_ancestor { |n| n.content == "root" }
+    found_node.should_not be_nil
+    found_node.content.should eql "root"
+  end
+  
+  it "should allow searching for all ancestors that match a condition" do
+    searching_node = @root["root_child_1_child_0"]
+    found_nodes = searching_node.find_all_ancestors { |n| n.content.start_with?("root") }
+    found_nodes.should_not be_empty
+    found_nodes.map(&:content).sort.should eql ["root", "root_child_1"]
   end
 end
 
