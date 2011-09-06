@@ -79,16 +79,15 @@ module RTree
       # Children
       # ----------------------------------------------------------------
 
-      def add_child(child)
+      def add_child(child, position = nil)
         if child.is_a?(Array)
           add_children_array(child)
         else
-          validate_child!(child).detach!.parent = self
-          children << child
+          insert_child(child, position)
         end
       end
-
-
+      
+      
       def add_children(*children)
         add_children_array(children)
       end
@@ -243,11 +242,9 @@ module RTree
       alias_method :levels, :height
 
 
-
       # ----------------------------------------------------------------
       # Tree traversal
       # ----------------------------------------------------------------
-
 
       def each_node(&action)
         action && action.call(self)
@@ -404,11 +401,9 @@ module RTree
       end
 
 
-
       # ----------------------------------------------------------------
       # Tree search
       # ----------------------------------------------------------------
-
 
       def find_node_by_content(content)
         find_node { |n| n.content == content }
@@ -499,13 +494,11 @@ module RTree
         end
         nodes
       end
-
-
-
+      
+      
       # ----------------------------------------------------------------
       # Node content
       # ----------------------------------------------------------------
-
 
       def content
         nil
@@ -517,11 +510,9 @@ module RTree
       end
 
 
-
       # ----------------------------------------------------------------
       # Enumerable
       # ----------------------------------------------------------------
-
 
       def <=>(other)
         return +1 if other.nil?
@@ -548,6 +539,17 @@ module RTree
         raise Exception, "#{child.class.name} is not an acceptable child for #{self.class.name}" unless self.class.acceptable_child?(child)
         child
       end
+      
+      
+      def insert_child(child, position = nil)
+        validate_child!(child).detach!.parent = self
+        if position
+          child_position = [position.to_i, children.size].min
+          children.insert(child_position, child)
+        else
+          children << child
+        end
+      end
 
 
       private
@@ -564,6 +566,10 @@ module RTree
   
   
   module Base
+    
+    # ----------------------------------------------------------------
+    # Node base parent & children methods
+    # ----------------------------------------------------------------
     
     def parent
       @parent
@@ -582,7 +588,29 @@ module RTree
   end
   
   
+  module Position
+    
+    # ----------------------------------------------------------------
+    # Node position
+    # ----------------------------------------------------------------
+    
+    def child_position(child)
+      children.index(child)
+    end
+    
+    
+    def position
+      parent ? parent.child_position(self) : nil
+    end
+    
+  end
+  
+  
   module Extended
+    
+    # ----------------------------------------------------------------
+    # Node extended methods
+    # ----------------------------------------------------------------
     
     def [](content)
       find_node_by_content(content)
@@ -601,6 +629,7 @@ module RTree
     def self.included(base)
       base.send(:include, RTree::Base)
       base.send(:include, RTree::Node)
+      base.send(:include, RTree::Position)
       base.send(:include, RTree::Extended)
       super
     end

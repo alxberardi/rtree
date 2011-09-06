@@ -635,3 +635,110 @@ describe RTree::Tree, "when implementing a Tree class" do
     InternalNodeClass.leaf_node?.should be_false
   end
 end
+
+describe RTree::Tree, "when adding ordered nodes" do
+  before do
+    @root = RTree::Tree.new("root")
+  end
+  
+  it "should allow adding a child specifying a position" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    
+    lambda { @root.add_child(child_1) }.should_not raise_exception
+    @root.add_child(child_0, 0)
+    @root.children.map(&:content).should eql ["child_0", "child_1"]
+  end
+  
+  it "should return the position of a child node" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    child_2 = RTree::Tree.new("child_2")
+    
+    @root.add_children(child_0,child_1,child_2)
+    @root.child_position(child_0).should eql 0
+    @root.child_position(child_1).should eql 1
+    @root.child_position(child_2).should eql 2
+  end
+  
+  it "should return the position of a node" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    child_2 = RTree::Tree.new("child_2")
+    
+    @root.add_children(child_0,child_1,child_2)
+    child_0.position.should eql 0
+    child_1.position.should eql 1
+    child_2.position.should eql 2
+  end
+  
+  it "should return nil as the position of a node with no parent" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    child_2 = RTree::Tree.new("child_2")
+    
+    @root.add_children(child_0,child_1)
+    child_0.position.should eql 0
+    child_1.position.should eql 1
+    child_2.position.should be_nil
+    
+    @root.add_child(child_2)
+    child_2.position.should eql 2
+  end
+  
+  it "it should default to the current number of child nodes when adding a child specifying a position which exceeds such number" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    child_2 = RTree::Tree.new("child_2")
+    
+    @root.add_children(child_0,child_1)
+    @root.add_child(child_2, 4)
+    @root.children.map(&:content).should eql ["child_0", "child_1", "child_2"]
+    child_2.position.should eql 2
+  end
+  
+  it "should update the position of child nodes after removing a node" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    child_2 = RTree::Tree.new("child_2")
+    
+    @root.add_children(child_0,child_1,child_2)
+    @root.children.map(&:content).should eql ["child_0", "child_1", "child_2"]
+    child_0.position.should eql 0
+    child_1.position.should eql 1
+    child_2.position.should eql 2
+    
+    @root.remove_child(child_1)
+    @root.children.map(&:content).should eql ["child_0", "child_2"]
+    child_0.position.should eql 0
+    child_2.position.should eql 1
+  end
+  
+  it "should set the position of a removed node to nil" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    child_2 = RTree::Tree.new("child_2")
+    
+    @root.add_children(child_0,child_1,child_2)
+    @root.remove_child(child_1)
+    child_1.position.should be_nil
+  end
+  
+  it "should allow readding a child node in a different position" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    child_2 = RTree::Tree.new("child_2")
+    
+    @root.add_children(child_0,child_1,child_2)
+    @root.children.map(&:content).should eql ["child_0", "child_1", "child_2"]
+    child_0.position.should eql 0
+    child_1.position.should eql 1
+    child_2.position.should eql 2
+    
+    @root.add_child(child_2, 1)
+    @root.children.map(&:content).should eql ["child_0", "child_2", "child_1"]
+    child_0.position.should eql 0
+    child_2.position.should eql 1
+    child_1.position.should eql 2
+  end
+end
