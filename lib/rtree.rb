@@ -496,6 +496,63 @@ module RTree
       end
       
       
+      def find_node_reverse(&condition)
+        return nil unless condition
+        each_node_reverse do |n|
+          return n if condition.call(n)
+        end
+        nil
+      end
+
+
+      def find_all_nodes_reverse(&condition)
+        nodes = []
+        return nodes unless condition
+        each_node_reverse do |n|
+          nodes << n if condition.call(n)
+        end
+        nodes
+      end
+      
+      
+      def find_descendant_reverse(&condition)
+        return nil unless condition
+        each_descendant_reverse do |n|
+          return n if condition.call(n)
+        end
+        nil
+      end
+
+
+      def find_all_descendants_reverse(&condition)
+        nodes = []
+        return nodes unless condition
+        each_descendant_reverse do |n|
+          nodes << n if condition.call(n)
+        end
+        nodes
+      end
+      
+      
+      def find_ancestor_reverse(&condition)
+        return nil unless condition
+        each_ancestor_reverse do |n|
+          return n if condition.call(n)
+        end
+        nil
+      end
+
+
+      def find_all_ancestors_reverse(&condition)
+        nodes = []
+        return nodes unless condition
+        each_ancestor_reverse do |n|
+          nodes << n if condition.call(n)
+        end
+        nodes
+      end
+      
+      
       # ----------------------------------------------------------------
       # Node content
       # ----------------------------------------------------------------

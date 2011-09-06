@@ -475,15 +475,27 @@ describe RTree::Tree, "when searching for nodes" do
   end
   
   it "should allow searching for a single node that matches condition" do
-    found_node = @root.find { |n| n.content == "root_child_1_child_0" }
+    found_node = @root.find_node { |n| n.content.starts_with?("root_child_1_child") }
     found_node.should_not be_nil
     found_node.content.should eql "root_child_1_child_0"
   end
   
+  it "should allow searching for a single node that matches condition in reverse order" do
+    found_node = @root.find_node_reverse { |n| n.content.starts_with?("root_child_1_child") }
+    found_node.should_not be_nil
+    found_node.content.should eql "root_child_1_child_1"
+  end
+  
   it "should allow searching for all nodes that match a condition" do
-    found_nodes = @root.find_all { |n| n.content == "root" || n.content.start_with?("root_child_0") }
+    found_nodes = @root.find_all_nodes { |n| n.content == "root" || n.content.start_with?("root_child_0") }
     found_nodes.should_not be_empty
-    found_nodes.map(&:content).sort.should eql ["root", "root_child_0", "root_child_0_child_0", "root_child_0_child_1"]
+    found_nodes.map(&:content).should eql ["root", "root_child_0", "root_child_0_child_0", "root_child_0_child_1"]
+  end
+  
+  it "should allow searching for all nodes that match a condition in reverse order" do
+    found_nodes = @root.find_all_nodes_reverse { |n| n.content == "root" || n.content.start_with?("root_child_0") }
+    found_nodes.should_not be_empty
+    found_nodes.map(&:content).should eql ["root", "root_child_0", "root_child_0_child_0", "root_child_0_child_1"].reverse
   end
   
   it "should allow searching in depth for all nodes that match a condition" do
@@ -511,25 +523,43 @@ describe RTree::Tree, "when searching for nodes" do
   end
   
   it "should allow searching for a single descendant that matches condition" do
-    found_node = @root.find_descendant { |n| n.content == "root_child_1_child_0" }
+    found_node = @root.find_descendant { |n| n.content.starts_with?("root") }
     found_node.should_not be_nil
-    found_node.content.should eql "root_child_1_child_0"
+    found_node.content.should eql "root_child_0"
+  end
+  
+  it "should allow searching for a single descendant that matches condition in reverse order" do
+    found_node = @root.find_descendant_reverse { |n| n.content.starts_with?("root") }
+    found_node.should_not be_nil
+    found_node.content.should eql "root_child_1_child_1"
   end
   
   it "should allow searching for all descendants that match a condition" do
     found_nodes = @root.find_all_descendants { |n| n.content.start_with?("root_child_0") }
     found_nodes.should_not be_empty
-    found_nodes.map(&:content).sort.should eql ["root_child_0", "root_child_0_child_0", "root_child_0_child_1"]
+    found_nodes.map(&:content).should eql ["root_child_0", "root_child_0_child_0", "root_child_0_child_1"]
+  end
+  
+  it "should allow searching for all descendants that match a condition in reverse order" do
+    found_nodes = @root.find_all_descendants_reverse { |n| n.content.start_with?("root_child_0") }
+    found_nodes.should_not be_empty
+    found_nodes.map(&:content).should eql ["root_child_0", "root_child_0_child_0", "root_child_0_child_1"].reverse
   end
   
   it "should allow searching for a single ancestor that matches condition" do
     searching_node = @root["root_child_1_child_0"]
     found_node = searching_node.find_ancestor { |n| n.content == "root_child_1_child_0" }
     found_node.should be_nil
-    found_node = searching_node.find_ancestor { |n| n.content == "root_child_1" }
+    found_node = searching_node.find_ancestor { |n| n.content.starts_with?("root") }
     found_node.should_not be_nil
     found_node.content.should eql "root_child_1"
-    found_node = searching_node.find_ancestor { |n| n.content == "root" }
+  end
+  
+  it "should allow searching for a single ancestor that matches condition in reverse order" do
+    searching_node = @root["root_child_1_child_0"]
+    found_node = searching_node.find_ancestor_reverse { |n| n.content == "root_child_1_child_0" }
+    found_node.should be_nil
+    found_node = searching_node.find_ancestor_reverse { |n| n.content.starts_with?("root") }
     found_node.should_not be_nil
     found_node.content.should eql "root"
   end
@@ -538,7 +568,14 @@ describe RTree::Tree, "when searching for nodes" do
     searching_node = @root["root_child_1_child_0"]
     found_nodes = searching_node.find_all_ancestors { |n| n.content.start_with?("root") }
     found_nodes.should_not be_empty
-    found_nodes.map(&:content).sort.should eql ["root", "root_child_1"]
+    found_nodes.map(&:content).should eql ["root_child_1", "root"]
+  end
+  
+  it "should allow searching for all ancestors that match a condition in reverse order" do
+    searching_node = @root["root_child_1_child_0"]
+    found_nodes = searching_node.find_all_ancestors_reverse { |n| n.content.start_with?("root") }
+    found_nodes.should_not be_empty
+    found_nodes.map(&:content).should eql ["root", "root_child_1"]
   end
 end
 
