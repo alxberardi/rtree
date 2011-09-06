@@ -1,6 +1,13 @@
 require 'enumerator'
 require 'active_support/core_ext'
 
+spec = Gem.loaded_specs["active_support"] || Gem.loaded_specs["activesupport"]
+if spec.version.to_s >= "3.0.0"
+  require 'active_support/concern'
+else
+  require 'support/concern'
+end
+
 module RTree
   
   module Node
