@@ -645,14 +645,16 @@ module RTree
       @parent
     end
       
-      
-    def parent=(parent)
-      @parent = validate_parent!(parent)
-    end
-      
     
     def children
       @children ||= []
+    end
+    
+    
+    protected
+    
+    def parent=(parent)
+      @parent = validate_parent!(parent)
     end
     
   end

@@ -42,6 +42,19 @@ describe RTree::Tree, "after creation of the root node" do
     @root.add_child(child)
     @root.children.size.should eql 1
     @root.children.should include child
+  end
+  
+  it "should return the correct parent of a node" do
+    child = RTree::Tree.new("1st child")
+    @root.add_child(child)
+    @root.parent.should be_nil
+    child.parent.should eql @root
+  end
+  
+  it "should not allow assigning the parent of a node" do
+    child = RTree::Tree.new("1st child")
+    @root.add_child(child)
+    lambda { child.parent = nil }.should raise_exception
     child.parent.should eql @root
   end
   
