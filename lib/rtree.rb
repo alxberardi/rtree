@@ -81,7 +81,7 @@ module RTree
 
       def add_child(child, position = nil)
         if child.is_a?(Array)
-          add_children_array(child)
+          add_children_array(child, position)
         else
           insert_child(child, position)
         end
@@ -89,12 +89,16 @@ module RTree
       
       
       def add_children(*children)
-        add_children_array(children)
+        add_children_array(children.flatten)
       end
 
 
-      def add_children_array(children)
-        children.each { |c| add_child(c) }
+      def add_children_array(children, position = nil)
+        if position
+          children.reverse_each { |c| insert_child(c, position) }
+        else
+          children.each { |c| insert_child(c) }
+        end
         self.children
       end
 
@@ -119,6 +123,15 @@ module RTree
 
       def clear!
         each_node_reverse(&:detach!)
+      end
+      
+      
+      # ----------------------------------------------------------------
+      # Position
+      # ----------------------------------------------------------------
+      
+      def child_position(child)
+        children.index(child)
       end
 
 
@@ -650,11 +663,6 @@ module RTree
     # ----------------------------------------------------------------
     # Node position
     # ----------------------------------------------------------------
-    
-    def child_position(child)
-      children.index(child)
-    end
-    
     
     def position
       parent ? parent.child_position(self) : nil

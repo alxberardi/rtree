@@ -687,6 +687,19 @@ describe RTree::Tree, "when adding ordered nodes" do
     @root.children.map(&:content).should eql ["child_0", "child_1"]
   end
   
+  it "should allow adding multiple children specifying a position" do
+    child_0 = RTree::Tree.new("child_0")
+    child_1 = RTree::Tree.new("child_1")
+    child_2 = RTree::Tree.new("child_2")
+    child_3 = RTree::Tree.new("child_3")
+    child_4 = RTree::Tree.new("child_4")
+    child_5 = RTree::Tree.new("child_5")
+    
+    @root.add_children(child_0, child_1, child_5)
+    lambda { @root.add_children_array([child_2, child_3, child_4], 2) }.should_not raise_exception
+    @root.children.map(&:content).should eql ["child_0", "child_1", "child_2", "child_3", "child_4", "child_5"]
+  end
+  
   it "should return the position of a child node" do
     child_0 = RTree::Tree.new("child_0")
     child_1 = RTree::Tree.new("child_1")
