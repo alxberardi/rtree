@@ -81,47 +81,69 @@ module RTree
     module RecordInstanceMethods
       
       def remove_child(child)
-        if children.include?(child)
-          if self.class.position_column
-            parent_id_key = self.class.reflect_on_association(:parent).options[:foreign_key]
-            self.class.update_all("#{self.class.position_column} = (#{self.class.position_column} - 1)", "#{parent_id_key} = #{self.id} AND #{self.class.position_column} >= #{child.position}")
-            child.position = nil
+        if children.to_a.include?(child)
+          position_column = self.class.position_column
+          if position_column
+            child_position = child.position || 0
+            child.update_attribute(position_column, nil)
           end
-          child.parent = nil
-          child.save!
-          children.reload
+          if self.new_record?
+            child.parent = nil
+            children.delete(child)
+            if position_column
+              Array.wrap(children[child_position..-1]).each do |c|
+                c.position = children.index(c)
+              end
+            end
+          else
+            parent_id_key = self.class.reflect_on_association(:parent).options[:foreign_key]
+            child.update_attribute(parent_id_key, nil)
+            children.reload
+            if position_column
+              self.class.update_all("#{self.class.position_column} = (#{self.class.position_column} - 1)", "#{parent_id_key} = #{self.id} AND #{self.class.position_column} >= #{child_position}")
+            end
+          end
           child
         end
       end
       
       
       def remove_children
-        removed = children.map do |child|
-          child.parent = nil
-          child.position = nil if self.class.position_column
-          child.save!
-          child
-        end
-        children.reload
-        removed
+        children.delete_all
+        children
       end
       
       
       protected
       
       def insert_child(child, position = nil)
-        raise Exception, "Position not supported for #{self.class.name}" if position && !self.class.position_column
-        child.detach!
-        if self.class.position_column
-          parent_id_key = self.class.reflect_on_association(:parent).options[:foreign_key]
-          max_position = self.class.count(:conditions => "#{parent_id_key} = #{self.id}")
-          child.position = (position ? [position.to_i, max_position].min : max_position)
-          child.save!
-          parent_id_key = self.class.reflect_on_association(:parent).options[:foreign_key]
-          self.class.update_all("#{self.class.position_column} = (#{self.class.position_column} + 1)", "#{parent_id_key} = #{self.id} AND #{self.class.position_column} >= #{child.position}")
+        position_column = self.class.position_column
+        raise Exception, "Position not supported for #{self.class.name}" if position && !position_column
+        if self.new_record?
+          child.position = position ? [position.to_i, children.size].min : children.size
+          if position
+            child_position = [position.to_i, children.size].min
+            children.insert(child_position, child)
+            if position_column
+              Array.wrap(children[child_position..-1]).each do |c|
+                c.position = children.index(c)
+              end
+            end
+          else
+            children << child
+          end
+          children
+        else
+          children << child
+          if position_column
+            parent_id_key = self.class.reflect_on_association(:parent).options[:foreign_key]
+            max_position = self.class.count(:conditions => "#{parent_id_key} = #{self.id}")
+            child_position = (position ? [position.to_i, max_position].min : max_position)
+            child.update_attribute(position_column, child_position)
+            self.class.update_all("#{self.class.position_column} = (#{self.class.position_column} + 1)", "#{parent_id_key} = #{self.id} AND #{self.class.position_column} >= #{child_position}")
+          end
+          children.reload
         end
-        children << child
-        children.reload
       end
       
     end
