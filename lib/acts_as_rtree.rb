@@ -137,7 +137,7 @@ module RTree
           children << child
           if position_column
             parent_id_key = self.class.reflect_on_association(:parent).options[:foreign_key]
-            max_position = self.class.count(:conditions => "#{parent_id_key} = #{self.id}")
+            max_position = children.size - 1
             child_position = (position ? [position.to_i, max_position].min : max_position)
             child.update_attribute(position_column, child_position)
             self.class.update_all("#{self.class.position_column} = (#{self.class.position_column} + 1)", "#{parent_id_key} = #{self.id} AND #{self.class.position_column} >= #{child_position}")
