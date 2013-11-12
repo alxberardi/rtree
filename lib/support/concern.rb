@@ -1,113 +1,104 @@
-# Copy of ActiveSupport::Concern for ActiveSupport < 3.x
-
 module ActiveSupport
   # A typical module looks like this:
   #
-  # module M
-  # def self.included(base)
-  # base.extend ClassMethods
-  # base.send(:include, InstanceMethods)
-  # scope :disabled, where(:disabled => true)
-  # end
+  #   module M
+  #     def self.included(base)
+  #       base.extend ClassMethods
+  #       base.class_eval do
+  #         scope :disabled, -> { where(disabled: true) }
+  #       end
+  #     end
   #
-  # module ClassMethods
-  # ...
-  # end
+  #     module ClassMethods
+  #       ...
+  #     end
+  #   end
   #
-  # module InstanceMethods
-  # ...
-  # end
-  # end
+  # By using <tt>ActiveSupport::Concern</tt> the above module could instead be
+  # written as:
   #
-  # By using <tt>ActiveSupport::Concern</tt> the above module could instead be written as:
+  #   require 'active_support/concern'
   #
-  # require 'active_support/concern'
+  #   module M
+  #     extend ActiveSupport::Concern
   #
-  # module M
-  # extend ActiveSupport::Concern
+  #     included do
+  #       scope :disabled, -> { where(disabled: true) }
+  #     end
   #
-  # included do
-  # scope :disabled, where(:disabled => true)
-  # end
+  #     module ClassMethods
+  #       ...
+  #     end
+  #   end
   #
-  # module ClassMethods
-  # ...
-  # end
+  # Moreover, it gracefully handles module dependencies. Given a +Foo+ module
+  # and a +Bar+ module which depends on the former, we would typically write the
+  # following:
   #
-  # module InstanceMethods
-  # ...
-  # end
-  # end
+  #   module Foo
+  #     def self.included(base)
+  #       base.class_eval do
+  #         def self.method_injected_by_foo
+  #           ...
+  #         end
+  #       end
+  #     end
+  #   end
   #
-  # Moreover, it gracefully handles module dependencies. Given a +Foo+ module and a +Bar+
-  # module which depends on the former, we would typically write the following:
+  #   module Bar
+  #     def self.included(base)
+  #       base.method_injected_by_foo
+  #     end
+  #   end
   #
-  # module Foo
-  # def self.included(base)
-  # base.class_eval do
-  # def self.method_injected_by_foo
-  # ...
-  # end
-  # end
-  # end
-  # end
+  #   class Host
+  #     include Foo # We need to include this dependency for Bar
+  #     include Bar # Bar is the module that Host really needs
+  #   end
   #
-  # module Bar
-  # def self.included(base)
-  # base.method_injected_by_foo
-  # end
-  # end
+  # But why should +Host+ care about +Bar+'s dependencies, namely +Foo+? We
+  # could try to hide these from +Host+ directly including +Foo+ in +Bar+:
   #
-  # class Host
-  # include Foo # We need to include this dependency for Bar
-  # include Bar # Bar is the module that Host really needs
-  # end
+  #   module Bar
+  #     include Foo
+  #     def self.included(base)
+  #       base.method_injected_by_foo
+  #     end
+  #   end
   #
-  # But why should +Host+ care about +Bar+'s dependencies, namely +Foo+? We could try to hide
-  # these from +Host+ directly including +Foo+ in +Bar+:
+  #   class Host
+  #     include Bar
+  #   end
   #
-  # module Bar
-  # include Foo
-  # def self.included(base)
-  # base.method_injected_by_foo
-  # end
-  # end
+  # Unfortunately this won't work, since when +Foo+ is included, its <tt>base</tt>
+  # is the +Bar+ module, not the +Host+ class. With <tt>ActiveSupport::Concern</tt>,
+  # module dependencies are properly resolved:
   #
-  # class Host
-  # include Bar
-  # end
+  #   require 'active_support/concern'
   #
-  # Unfortunately this won't work, since when +Foo+ is included, its <tt>base</tt> is the +Bar+ module,
-  # not the +Host+ class. With <tt>ActiveSupport::Concern</tt>, module dependencies are properly resolved:
+  #   module Foo
+  #     extend ActiveSupport::Concern
+  #     included do
+  #       def self.method_injected_by_foo
+  #         ...
+  #       end
+  #     end
+  #   end
   #
-  # require 'active_support/concern'
+  #   module Bar
+  #     extend ActiveSupport::Concern
+  #     include Foo
   #
-  # module Foo
-  # extend ActiveSupport::Concern
-  # included do
-  # class_eval do
-  # def self.method_injected_by_foo
-  # ...
-  # end
-  # end
-  # end
-  # end
+  #     included do
+  #       self.method_injected_by_foo
+  #     end
+  #   end
   #
-  # module Bar
-  # extend ActiveSupport::Concern
-  # include Foo
-  #
-  # included do
-  # self.method_injected_by_foo
-  # end
-  # end
-  #
-  # class Host
-  # include Bar # works, Bar takes care now of its dependencies
-  # end
-  #
+  #   class Host
+  #     include Bar # works, Bar takes care now of its dependencies
+  #   end
   module Concern
-    def self.extended(base)
+    def self.extended(base) #:nodoc:
       base.instance_variable_set("@_dependencies", [])
     end
 
@@ -120,7 +111,6 @@ module ActiveSupport
         @_dependencies.each { |dep| base.send(:include, dep) }
         super
         base.extend const_get("ClassMethods") if const_defined?("ClassMethods")
-        base.send :include, const_get("InstanceMethods") if const_defined?("InstanceMethods")
         base.class_eval(&@_included_block) if instance_variable_defined?("@_included_block")
       end
     end
